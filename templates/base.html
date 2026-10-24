@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>{% block title %}ATS Resume Analyzer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}?v=3">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('home') }}" aria-label="ATS Analyzer home"><span class="brand-mark" aria-hidden="true">✦</span><span>ATS <b>Analyzer</b></span></a>
+    {% if current_user.is_authenticated %}
+    <nav aria-label="Main navigation">
+      <div class="nav-links"><a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('jobs') }}">Job descriptions</a>
+        {% if current_user.is_admin %}<a href="{{ url_for('admin_users') }}">Users</a>{% endif %}
+      </div>
+      <div class="nav-account"><span class="nav-user">{{ current_user.full_name }}</span>
+        <form method="post" action="{{ url_for('logout') }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button">Sign out</button></form>
+      </div>
+    </nav>
+    {% endif %}
+  </header>
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="notices">{% for category, message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>ATS Resume Analyzer <span>·</span> Clear feedback for your next application</footer>
+  <script src="{{ url_for('static', filename='print.js') }}" defer></script>
+</body>
+</html>

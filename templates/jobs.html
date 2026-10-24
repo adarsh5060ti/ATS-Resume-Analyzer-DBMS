@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Job descriptions · ATS Analyzer{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">ROLE TARGETING</p><h1>Job descriptions</h1><p class="muted">Save target roles and keyword lists for future resume comparisons.</p></div></div>
+<div class="two-column">
+  <section class="panel">
+    <h2>{{ 'Edit job description' if job else 'Add a job description' }}</h2>
+    <form method="post" action="{{ url_for('edit_job', job_id=job.job_description_id) if job else url_for('new_job') }}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Job title<input name="title" maxlength="160" required value="{{ request.form.get('title', job.title if job else '') }}"></label>
+      <label>Company<input name="company" maxlength="160" value="{{ request.form.get('company', job.company if job else '') }}"></label>
+      <label>Description<textarea name="description" rows="7" maxlength="20000" required>{{ request.form.get('description', job.description if job else '') }}</textarea></label>
+      <label>Keywords <span class="muted">(comma separated)</span><input name="keywords" value="{{ request.form.get('keywords', keyword_text) }}"></label>
+      <button class="button primary">{{ 'Save changes' if job else 'Save job description' }}</button>
+      {% if job %}<a href="{{ url_for('jobs') }}">Cancel edit</a>{% endif %}
+    </form>
+  </section>
+  <section class="panel">
+    <h2>Saved roles</h2>
+    {% for item in jobs %}
+    <article class="job-card">
+      <h3>{{ item.title }}</h3><p class="muted">{{ item.company or 'Company not set' }}</p>
+      <p>{{ item.description[:240] }}{% if item.description|length > 240 %}…{% endif %}</p>
+      <div class="chips">{% for keyword in item.keywords %}<span>{{ keyword.keyword }}</span>{% endfor %}</div>
+      <div class="actions">
+        <a class="button secondary" href="{{ url_for('edit_job', job_id=item.job_description_id) }}">Edit</a>
+        <form method="post" action="{{ url_for('delete_job', job_id=item.job_description_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button danger">Delete</button></form>
+      </div>
+    </article>
+    {% else %}<p class="muted">No saved job descriptions.</p>{% endfor %}
+  </section>
+</div>
+{% endblock %}

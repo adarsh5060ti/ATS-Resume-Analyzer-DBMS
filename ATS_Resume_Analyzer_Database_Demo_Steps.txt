@@ -1,0 +1,32 @@
+ATS RESUME ANALYZER - CURRENT DATABASE DEMO
+
+The active app uses Flask and SQLAlchemy ORM. The previous Oracle app is preserved as legacy_oracle_app.py; do not use its old demo credentials or instructions as current setup.
+
+SETUP
+1. Install the requirements listed in requirements.txt in the project virtual environment.
+2. Copy .env.example to .env, set a unique SECRET_KEY, and optionally set GEMINI_API_KEY.
+3. Run: python app.py
+4. Open http://127.0.0.1:5000 and create the first account. The first local account is ADMIN.
+5. Upload a text-readable PDF or TXT file from the Dashboard.
+
+APPLICATION DEMO
+1. Show the dashboard count and average score.
+2. Open an analysis and explain its keyword, skill, format, experience, and education components.
+3. Show detected skills, recommendations, candidate record editing, and deletion controls.
+4. Add a confirmed education or experience detail. Do not invent details not present in the sample resume.
+5. Use dashboard search and score filters; demonstrate pagination if enough records exist.
+6. Add and edit a target job description and its keywords.
+7. Sign in with a second account only after configuring REGISTRATION_CODE; explain USER versus ADMIN access.
+
+DATABASE DEMO
+1. Explain the ten ORM tables using docs/ER_DIAGRAM.md and docs/DATA_DICTIONARY.md.
+2. Show that analysis writes occur through SQLAlchemy and are committed or rolled back as one transaction.
+3. Demonstrate the SQLite view resume_analysis_summary and trigger sync_resume_score_after_analysis using a disposable copy of the database.
+4. Run: python scripts/backup_database.py
+5. SQLite does not support stored procedures. Explain the assignment's “where supported” qualification.
+
+SUBMISSION EVIDENCE
+Replace report placeholders with actual team information. Capture screenshots from the live local application. Show GitHub collaborators, private repository, main/dev branches, real commit history, backup/restore proof, and deployment URL only after completing those tasks.
+
+PRIVACY
+Use a synthetic resume or one whose owner has agreed to its use. The repository ignores uploaded files, local database files, and backups. Never show real passwords, API keys, or candidate PII during a public review.

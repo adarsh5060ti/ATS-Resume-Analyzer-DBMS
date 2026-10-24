@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ resume.candidate_name }} · ATS Analyzer{% endblock %}
+{% block content %}
+{% if analysis and 'AI-generated recommendations are temporarily unavailable.' in analysis.suggestions %}<div class="notice info no-print"><div><strong>AI service was briefly unavailable.</strong> Practical ATS tips are saved below. Retry to request fresh AI recommendations.</div><form method="post" action="{{ url_for('regenerate_recommendations', resume_id=resume.resume_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button secondary">Retry AI recommendations</button></form></div>{% endif %}
+<p class="back no-print"><a href="{{ url_for('dashboard') }}">← Dashboard</a></p>
+<div class="page-heading no-print"><div><p class="eyebrow">RESUME ANALYSIS</p><h1>{{ resume.candidate_name }}</h1><p class="muted">{{ resume.file_name }} · uploaded {{ resume.uploaded_at.strftime('%d %b %Y, %H:%M') if resume.uploaded_at else '' }}</p></div><div class="actions"><a class="button secondary" href="{{ url_for('edit_resume', resume_id=resume.resume_id) }}">Edit details</a><form method="post" action="{{ url_for('delete_resume', resume_id=resume.resume_id) }}" onsubmit="return confirm('Delete this resume and its saved analysis?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button danger">Delete</button></form></div></div>
+
+<section class="panel no-print"><h2>Contact details</h2><dl class="details"><dt>Email</dt><dd>{{ resume.email or 'Not detected' }}</dd><dt>Phone</dt><dd>{{ resume.phone or 'Not detected' }}</dd></dl><h3>Detected skills</h3>{% if resume.resume_skills %}<div class="chips">{% for item in resume.resume_skills %}<span>{{ item.skill.name }}</span>{% endfor %}</div>{% else %}<p class="muted">No listed technical skills were detected.</p>{% endif %}</section>
+
+<section class="print-target" id="print-summary">
+  <header class="print-header"><p class="eyebrow">ATS RESUME ANALYSIS</p><h1>{{ resume.candidate_name }}</h1><p class="muted">{{ resume.file_name }} · {{ resume.uploaded_at.strftime('%d %b %Y') if resume.uploaded_at else '' }}</p></header>
+  <div class="score-hero"><div class="big-score">{{ '%.1f'|format(resume.ats_score) }}<small>/100</small></div><div><h2>ATS compatibility score</h2><p>Use this score as a guide and tailor your resume to each role.</p></div></div>
+  <section class="score-grid">{% if analysis %}{% for label, value in [('Keywords',analysis.keyword_score),('Skills',analysis.skills_score),('Format',analysis.format_score),('Experience',analysis.experience_score),('Education',analysis.education_score)] %}<article class="score-card"><span>{{ label }}</span><strong>{{ '%.1f'|format(value) }}</strong><div class="meter"><i style="width: {{ value }}%"></i></div></article>{% endfor %}{% endif %}</section>
+  <section class="panel print-recommendations"><h2>AI recommendations</h2>{% if analysis %}<pre class="suggestions">{{ analysis.suggestions }}</pre>{% else %}<p class="muted">No recommendations are saved for this resume.</p>{% endif %}</section>
+</section>
+
+<div class="print-actions no-print"><button type="button" class="button primary" data-print>Print score and recommendations</button></div>
+{% endblock %}

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <a href="/" class="brand">
+            <span class="brand-main">ATS</span><span class="brand-accent">Analyzer</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#workflow">How It Works</a>
+            <a href="#about">About</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+{% if not score %}
+
+<section class="hero" id="home">
+    <div class="hero-container">
+
+        <div class="hero-content">
+            <div class="eyebrow">AI-POWERED RESUME ANALYSIS</div>
+
+            <h1>
+                Make Your Resume
+                <span>ATS Ready.</span>
+            </h1>
+
+            <p class="hero-description">
+                Analyze your resume, understand your ATS score, identify
+                weaknesses and get personalized AI recommendations to improve
+                your resume.
+            </p>
+
+            <form action="{{ url_for('analyze') }}"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  id="resumeForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="upload-box" id="uploadBox">
+                    <input
+                        type="file"
+                        id="resume"
+                        name="resume"
+                        accept=".pdf,.txt"
+                        hidden
+                        required
+                    >
+
+                    <div class="upload-icon">↑</div>
+
+                    <h3>Upload your resume</h3>
+                    <p>Choose your resume to begin the analysis</p>
+                    <span class="upload-note">
+                        PDF or TXT • Maximum 10 MB
+                    </span>
+
+                    <div class="file-name" id="fileName">
+                        No file selected
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="chooseBtn">
+                        Choose Resume
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-secondary">
+                        Check Resume
+                    </button>
+                </div>
+
+                <div class="trust-row">
+                    <span>✓ No account required</span>
+                    <span>✓ Temporary analysis</span>
+                    <span>✓ ATS feedback</span>
+                </div>
+                <p class="privacy-note">The uploaded file is deleted after text extraction, and this app does not save your resume or results in its database. Extracted resume text is sent to Gemini to generate AI recommendations.</p>
+            </form>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="hero-preview">
+            <div class="preview-card">
+
+                <div class="preview-top">
+                    <span>Resume Analysis</span>
+                    <span class="preview-status">READY</span>
+                </div>
+
+                <div class="preview-score-ring">
+                    <div class="ring-inner">
+                        <strong>--</strong>
+                        <span>/100</span>
+                    </div>
+                </div>
+
+                <h3>Analyze Your Resume</h3>
+
+                <p>
+                    Upload a resume to calculate your ATS compatibility
+                    score and get improvement suggestions.
+                </p>
+
+                <div class="preview-lines">
+                    <div>
+                        <span>Keywords</span>
+                        <b>--</b>
+                    </div>
+
+                    <div>
+                        <span>Skills</span>
+                        <b>--</b>
+                    </div>
+
+                    <div>
+                        <span>Format</span>
+                        <b>--</b>
+                    </div>
+
+                    <div>
+                        <span>Experience</span>
+                        <b>--</b>
+                    </div>
+
+                    <div>
+                        <span>Education</span>
+                        <b>--</b>
+                    </div>
+                </div>
+
+                <div class="preview-checklist">
+                    <div><span>✓</span> Contact Information</div>
+                    <div><span>✓</span> Skills</div>
+                    <div><span>✓</span> Professional Summary</div>
+                    <div><span>✓</span> Education</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section section-light" id="features">
+    <div class="section-container">
+
+        <div class="section-heading">
+            <span class="section-label">FEATURES</span>
+
+            <h2>
+                Everything you need for an ATS-ready resume.
+            </h2>
+
+            <p>
+                The analyzer combines structured ATS scoring with
+                personalized AI recommendations.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+
+            <article class="feature-card">
+                <div class="feature-icon">01</div>
+
+                <h3>ATS Score</h3>
+
+                <p>
+                    Get an easy-to-understand score based on multiple
+                    resume components.
+                </p>
+            </article>
+
+            <article class="feature-card">
+                <div class="feature-icon">02</div>
+
+                <h3>Score Breakdown</h3>
+
+                <p>
+                    See separate keyword, skills, formatting, experience
+                    and education scores.
+                </p>
+            </article>
+
+            <article class="feature-card">
+                <div class="feature-icon">03</div>
+
+                <h3>AI Recommendations</h3>
+
+                <p>
+                    Receive personalized suggestions generated from your
+                    uploaded resume.
+                </p>
+            </article>
+
+            <article class="feature-card">
+                <div class="feature-icon">04</div>
+
+                <h3>Private, One-Time Processing</h3>
+
+                <p>
+                    Your resume and analysis are not saved in this app.
+                    The temporary upload is removed after text extraction.
+                </p>
+            </article>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section section-blue" id="workflow">
+
+    <div class="section-container">
+
+        <div class="section-heading section-heading-white">
+
+            <span class="section-label">HOW IT WORKS</span>
+
+            <h2>
+                From resume upload to actionable feedback.
+            </h2>
+
+        </div>
+
+        <div class="workflow-grid">
+
+            <div class="workflow-step">
+                <span>01</span>
+
+                <h3>Upload</h3>
+
+                <p>
+                    Select your PDF or TXT resume.
+                </p>
+            </div>
+
+            <div class="workflow-step">
+                <span>02</span>
+
+                <h3>Extract</h3>
+
+                <p>
+                    The application extracts readable resume text.
+                </p>
+            </div>
+
+            <div class="workflow-step">
+                <span>03</span>
+
+                <h3>Analyze</h3>
+
+                <p>
+                    ATS components are evaluated and scored.
+                </p>
+            </div>
+
+            <div class="workflow-step">
+                <span>04</span>
+
+                <h3>Improve</h3>
+
+                <p>
+                    Gemini AI provides personalized recommendations.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="section section-light" id="about">
+
+    <div class="section-container about-content">
+
+        <div>
+
+            <span class="section-label">ABOUT</span>
+
+            <h2>
+                Built to make ATS feedback easier to understand.
+            </h2>
+
+        </div>
+
+        <p>
+            ATS Analyzer is a student-focused web application that helps
+            anyone understand how a resume performs against common ATS
+            criteria. It extracts text temporarily, calculates a score and
+            requests Gemini recommendations without saving resume uploads or
+            analysis results in the app database.
+        </p>
+
+    </div>
+
+</section>
+
+
+{% else %}
+
+
+<section class="results-header">
+
+    <div class="results-container">
+
+        <span class="section-label">
+            ANALYSIS COMPLETE
+        </span>
+
+        <h1>
+            Your Resume Analysis
+        </h1>
+
+        <p>
+            File analyzed:
+            <strong>{{ filename }}</strong>
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="results-container">
+
+    <div class="candidate-grid">
+
+        <div class="info-card">
+            <span>Candidate</span>
+            <strong>
+                {{ candidate_name or "Not detected" }}
+            </strong>
+        </div>
+
+        <div class="info-card">
+            <span>Email</span>
+            <strong>
+                {{ email or "Not detected" }}
+            </strong>
+        </div>
+
+        <div class="info-card">
+            <span>Phone</span>
+            <strong>
+                {{ phone or "Not detected" }}
+            </strong>
+        </div>
+
+        <div class="info-card score-small-card">
+            <span>ATS Score</span>
+
+            <strong>
+                {{ "%.2f"|format(score|float) }}/100
+            </strong>
+        </div>
+
+    </div>
+
+
+    <div class="result-card score-card">
+
+        <div class="result-card-header">
+
+            <div>
+
+                <span class="section-label">
+                    ATS PERFORMANCE
+                </span>
+
+                <h2>
+                    Score Breakdown
+                </h2>
+
+            </div>
+
+            <div class="score-badge">
+                {{ "%.2f"|format(score|float) }}/100
+            </div>
+
+        </div>
+
+
+        <div class="score-grid">
+
+            <div class="score-item">
+
+                <div class="score-item-top">
+                    <span>Keywords</span>
+
+                    <strong>
+                        {{ "%.2f"|format(keyword_score|float) }}
+                    </strong>
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ keyword_score }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-item">
+
+                <div class="score-item-top">
+                    <span>Skills</span>
+
+                    <strong>
+                        {{ "%.2f"|format(skills_score|float) }}
+                    </strong>
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ skills_score }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-item">
+
+                <div class="score-item-top">
+                    <span>Format</span>
+
+                    <strong>
+                        {{ "%.2f"|format(format_score|float) }}
+                    </strong>
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ format_score }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-item">
+
+                <div class="score-item-top">
+                    <span>Experience</span>
+
+                    <strong>
+                        {{ "%.2f"|format(experience_score|float) }}
+                    </strong>
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ experience_score }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-item">
+
+                <div class="score-item-top">
+                    <span>Education</span>
+
+                    <strong>
+                        {{ "%.2f"|format(education_score|float) }}
+                    </strong>
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ education_score }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         AI RECOMMENDATIONS
+    ========================================== -->
+
+    <div class="result-card ai-card">
+
+        <div class="ai-header">
+
+            <div class="ai-title-block">
+
+                <span class="ai-badge">
+                    ✦ AI POWERED
+                </span>
+
+                <h2>
+                    How to Improve Your ATS Score
+                </h2>
+
+                <p>
+                    Personalized recommendations generated from your
+                    uploaded resume.
+                </p>
+
+            </div>
+
+
+            <div class="ai-header-actions">
+
+                <button
+                    type="button"
+                    class="print-ai-btn"
+                    data-print-ai>
+
+                    🖨 Print Suggestions
+
+                </button>
+
+                <div class="ai-icon">
+                    AI
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="ai-content"
+            id="aiRecommendations">
+
+            <div class="print-title">
+                ATS Resume Analyzer
+                <span>
+                    AI Resume Improvement Recommendations
+                </span>
+            </div>
+
+
+            {% if suggestions %}
+
+                <pre class="ai-suggestions">{{ suggestions }}</pre>
+
+            {% else %}
+
+                <p class="empty-ai">
+                    AI recommendations are currently unavailable.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="improve-card">
+
+        <div class="improve-icon">
+            ↑
+        </div>
+
+        <div>
+
+            <h2>
+                Want a Higher ATS Score?
+            </h2>
+
+            <p>
+                Follow the recommendations above, update your resume and
+                upload the revised version again. The system will calculate
+                a new score.
+            </p>
+
+        </div>
+
+        <a href="/" class="improve-btn">
+            Analyze Again
+        </a>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-container">
+
+        <div>
+
+            <a href="/" class="brand footer-brand">
+                <span class="brand-main">ATS</span><span class="brand-accent">Analyzer</span>
+            </a>
+
+            <p>
+                Resume analysis with structured ATS scoring and
+                AI-powered recommendations.
+            </p>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <a href="#features">
+                Features
+            </a>
+
+            <a href="#workflow">
+                How It Works
+            </a>
+
+            <a href="#about">
+                About
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+        © 2026 ATS Resume Analyzer
+    </div>
+
+</footer>
+
+
+<script src="{{ url_for('static', filename='site.js') }}?v=1" defer></script>
+
+</body>
+</html>

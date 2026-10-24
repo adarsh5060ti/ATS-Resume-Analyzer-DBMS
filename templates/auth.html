@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Create account' if mode == 'register' else 'Sign in' }} · ATS Analyzer{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <p class="eyebrow">RESUME ANALYSIS WORKSPACE</p>
+  <h1>{{ 'Create your account' if mode == 'register' else 'Welcome back' }}</h1>
+  <p class="muted">{{ 'Save and manage your resume analyses securely.' if mode == 'register' else 'Sign in to view your dashboard and saved analyses.' }}</p>
+  <form method="post" class="stack-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if mode == 'register' %}<label>Full name<input name="full_name" maxlength="120" autocomplete="name" required value="{{ request.form.get('full_name','') }}"></label><label>Invite code <span class="muted">(required after the first account)</span><input name="invite_code" autocomplete="off"></label>{% endif %}
+    <label>Email<input name="email" type="email" maxlength="254" autocomplete="email" required value="{{ request.form.get('email','') }}"></label>
+    <label>Password<input name="password" type="password" minlength="10" maxlength="128" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" required></label>
+    {% if mode == 'login' %}<label class="check"><input type="checkbox" name="remember" value="1"> Keep me signed in</label>{% endif %}
+    <button class="button primary">{{ 'Create account' if mode == 'register' else 'Sign in' }}</button>
+  </form>
+  <p class="muted">{% if mode == 'register' %}Already registered? <a href="{{ url_for('login') }}">Sign in</a>{% else %}New here? <a href="{{ url_for('register') }}">Create an account</a>{% endif %}</p>
+  {% if mode == 'register' %}<p class="hint">The first account in a fresh database is administrator. Later registrations require a code set by the administrator.</p>{% endif %}
+</section>
+{% endblock %}

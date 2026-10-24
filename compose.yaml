@@ -1,0 +1,18 @@
+services:
+  ats-resume-analyzer:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////data/ats_analyzer.db
+      COOKIE_SECURE: "0"
+    volumes:
+      - ats-database:/data
+      - ats-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  ats-database:
+  ats-uploads:

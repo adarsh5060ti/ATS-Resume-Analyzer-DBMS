@@ -1,0 +1,10 @@
+Flask>=3.1,<4
+Flask-Login>=0.6,<1
+Flask-SQLAlchemy>=3.1,<4
+SQLAlchemy>=2.0,<3
+python-dotenv>=1.0,<2
+google-genai>=1.0,<2
+oracledb>=2.0,<4
+pypdf>=5.0,<7
+psycopg[binary]>=3.1,<4
+gunicorn>=23,<24; platform_system != "Windows"
