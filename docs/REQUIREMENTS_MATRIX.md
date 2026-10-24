@@ -1,4 +1,4 @@
-# QP 8 Requirement Status
+# Requirement Status
 
 This matrix distinguishes code prepared locally from items that require real account, team, database or deployment access. See the attached QP 8 PDF for the assignment wording.
 
