@@ -112,6 +112,23 @@ section {
     color: var(--teal-dark);
 }
 
+.nav-signout-form {
+    margin: 0;
+}
+
+.nav-signout {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--navy-dark);
+    cursor: pointer;
+    font: inherit;
+}
+
+.nav-signout:hover {
+    color: var(--teal-dark);
+}
+
 
 /* =========================================
    HERO

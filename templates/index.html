@@ -20,6 +20,12 @@
             <a href="#features">Features</a>
             <a href="#workflow">How It Works</a>
             <a href="#about">About</a>
+            {% if current_user.is_authenticated %}
+            <form action="{{ url_for('logout') }}" method="POST" class="nav-signout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="nav-signout">Sign out</button>
+            </form>
+            {% endif %}
         </nav>
     </div>
 </header>
