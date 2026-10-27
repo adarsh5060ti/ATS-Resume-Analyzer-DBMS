@@ -25,13 +25,12 @@ python scripts/create_faculty_demo_db.py --output instance/faculty_demo_for_clas
 
 ## Show the schema visually
 
-1. Open `instance/faculty_demo.db` in DB Browser for SQLite.
-2. On **Database Structure**, show the ten tables, primary keys, indexes, the view, and the trigger.
-3. On **Browse Data**, inspect the role, user, resume, skill, education, experience, job, keyword, and analysis rows.
-4. Open `docs/ER_DIAGRAM.md` and `docs/DATA_DICTIONARY.md` beside the database. Trace `roles → users → resumes → ats_analysis`, and the `resumes ↔ skills` relation through `resume_skills`.
-5. Show `models.py` to explain that ordinary inserts, updates, deletes, joins, and aggregates use SQLAlchemy ORM. The SQLite view and trigger are the advanced database features implemented with SQL.
-6. Run `python scripts/backup_database.py --source instance/faculty_demo.db` to create a timestamped backup under `backup/`.
-7. Restore that backup to a separate file (copy the actual backup filename from the command output):
+1. Double-click `Show_Faculty_Database.pyw`. It opens a local browser dashboard containing all ten tables, their columns and keys, row data, foreign-key links, indexes, view, and trigger. Password hashes are hidden. If the demo database is missing, it creates a synthetic one first.
+2. Optionally open `instance/faculty_demo.db` in DB Browser for SQLite for an interactive database view.
+3. Open `docs/ER_DIAGRAM.md` and `docs/DATA_DICTIONARY.md` beside the database. Trace `roles → users → resumes → ats_analysis`, and the `resumes ↔ skills` relation through `resume_skills`.
+4. Show `models.py` to explain that ordinary inserts, updates, deletes, joins, and aggregates use SQLAlchemy ORM. The SQLite view and trigger are the advanced database features implemented with SQL.
+5. Run `python scripts/backup_database.py --source instance/faculty_demo.db` to create a timestamped backup under `backup/`.
+6. Restore that backup to a separate file (copy the actual backup filename from the command output):
 
    ```powershell
    python scripts/restore_database.py backup/faculty_demo_<timestamp>.db --output instance/faculty_demo_restored.db

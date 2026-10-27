@@ -12,15 +12,14 @@ The script creates instance/faculty_demo.db and refuses to overwrite it. It fill
   python scripts/create_faculty_demo_db.py --output instance/faculty_demo_for_class.db
 
 FACULTY PRESENTATION ORDER
-1. Open docs/ER_DIAGRAM.md and explain the entities and their relations.
-2. Open docs/DATA_DICTIONARY.md and point out keys, constraints, and indexes.
-3. Open models.py and show SQLAlchemy models and ORM relationships.
-4. Open instance/faculty_demo.db with DB Browser for SQLite.
-5. In Database Structure, show the 10 tables, indexes, view and trigger.
-6. In Browse Data, inspect the fictional role, user, resume, skill, education, experience, job, keyword, and analysis records.
-7. Run the demo script again only if creating a new output file; its output already shows ORM CRUD, a join, grouped count/average, trigger score sync, view output, rollback, and final row counts.
-8. Optional backup: python scripts/backup_database.py --source instance/faculty_demo.db
-9. Restore a separate copy, using the actual backup filename printed above:
+1. Double-click Show_Faculty_Database.pyw. One browser page shows all ten tables, columns, keys, sample rows, indexes, relationships, view, and trigger. Password hashes are hidden.
+2. Open docs/ER_DIAGRAM.md and explain the entities and their relations.
+3. Open docs/DATA_DICTIONARY.md and point out keys, constraints, and indexes.
+4. Open models.py and show SQLAlchemy models and ORM relationships.
+5. The creation script prints ORM CRUD, join, aggregate, trigger, view, rollback, and row-count evidence. For a fresh run use a new output name:
+   python scripts/create_faculty_demo_db.py --output instance/faculty_demo_for_class.db
+6. Optional backup: python scripts/backup_database.py --source instance/faculty_demo.db
+7. Restore a separate copy, using the actual backup filename printed above:
    python scripts/restore_database.py backup/faculty_demo_<timestamp>.db --output instance/faculty_demo_restored.db
 
 The ten tables are roles, users, resumes, skills, resume_skills, education, experience, job_descriptions, job_keywords, and ats_analysis.

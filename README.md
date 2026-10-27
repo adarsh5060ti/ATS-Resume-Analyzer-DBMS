@@ -82,6 +82,8 @@ When Google OAuth is configured, users must sign in before accessing resume uplo
 
 For a populated, isolated SQLite database walkthrough, run `python scripts/create_faculty_demo_db.py`. It creates a synthetic `instance/faculty_demo.db` and demonstrates ORM CRUD, joins, aggregates, a transaction, plus the SQLite view and trigger. The file is separate from the public website data.
 
+For a one-click read-only overview of every table and row, double-click `Show_Faculty_Database.pyw`. It opens a local browser page with columns, keys, indexes, foreign-key links, the view, and trigger; password hashes are hidden. If the synthetic database is missing, it creates it first.
+
 ## GitHub checklist
 
 The project owner selected a public repository, while QP 8 requires a private repository. This mismatch may affect marks. Add the actual team members as collaborators and use `main` and `dev` branches. Commit source, docs, schema and configuration only. Do not commit `.env`, database files, backups or resume uploads. Build a truthful history with at least ten meaningful commits as work progresses; do not fabricate historical commits.
