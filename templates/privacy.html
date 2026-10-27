@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy · ATSAnalyzer{% endblock %}
+{% block content %}
+<article class="policy-card">
+  <p class="eyebrow">ATSANALYZER</p>
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: October 28, 2026</p>
+
+  <h2>Information used to sign in</h2>
+  <p>When you choose Google sign-in, Google shares your basic profile information with this app: your name, email address, and account identifier. The app uses this information to create your signed-in session. It does not save Google access tokens or write your Google profile to the resume-analysis database.</p>
+
+  <h2>Resume files and analysis</h2>
+  <p>The resume file is processed temporarily to extract its text and is deleted after extraction. The ATS score and recommendations are returned in the response and are not saved to the app database. If AI recommendations are enabled, extracted resume text is sent to Google Gemini to generate them.</p>
+
+  <h2>Service providers</h2>
+  <p>Google provides sign-in and, when enabled, Gemini recommendations. The application is hosted by Render. These providers process information as needed to provide their services under their own privacy terms.</p>
+
+  <h2>Retention and security</h2>
+  <p>The signed-in session is stored in a secure, HTTP-only session cookie. Resume uploads and analysis results are not retained by this application after the request completes. The site uses HTTPS when accessed through its public address.</p>
+
+  <h2>Your choices and contact</h2>
+  <p>You can sign out at any time and choose not to upload a resume. For privacy questions about ATSAnalyzer, contact <a href="mailto:justinroyironman@gmail.com">justinroyironman@gmail.com</a>.</p>
+</article>
+{% endblock %}

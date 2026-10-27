@@ -146,7 +146,7 @@ def restrict_to_ephemeral_public_analyzer():
     # This deployment mode exposes only one-time public analysis. Legacy
     # dashboard, resume CRUD, jobs and admin endpoints remain disabled.
     if request.endpoint in {
-        "home", "analyze", "health", "static", "login",
+        "home", "analyze", "health", "static", "privacy_policy", "login",
         "google_login", "google_callback", "logout",
     }:
         return None
@@ -226,6 +226,11 @@ with app.app_context():
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.get("/privacy")
+def privacy_policy():
+    return render_template("privacy.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
