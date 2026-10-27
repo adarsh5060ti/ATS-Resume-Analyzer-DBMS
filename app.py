@@ -137,7 +137,9 @@ def protect_post_requests():
 
 @app.before_request
 def require_login_for_resume_analysis():
-    if LOGIN_REQUIRED and request.endpoint in {"home", "analyze"} and not current_user.is_authenticated:
+    # Let anyone view the landing page. Require Google sign-in only when the
+    # resume is submitted for analysis; the file is not read before this gate.
+    if LOGIN_REQUIRED and request.endpoint == "analyze" and not current_user.is_authenticated:
         return redirect(url_for("login"))
 
 

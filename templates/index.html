@@ -20,7 +20,6 @@
             <a href="#features">Features</a>
             <a href="#workflow">How It Works</a>
             <a href="#about">About</a>
-            <a href="{{ url_for('login') }}">Sign in</a>
         </nav>
     </div>
 </header>
@@ -46,6 +45,7 @@
                 your resume.
             </p>
 
+            {% if current_user.is_authenticated %}
             <form action="{{ url_for('analyze') }}"
                   method="POST"
                   enctype="multipart/form-data"
@@ -91,12 +91,29 @@
                 </div>
 
                 <div class="trust-row">
-                    <span>✓ No account required</span>
+                    <span>✓ Signed in with Google</span>
                     <span>✓ Temporary analysis</span>
                     <span>✓ ATS feedback</span>
                 </div>
                 <p class="privacy-note">The uploaded file is deleted after text extraction, and this app does not save your resume or results in its database. Extracted resume text is sent to Gemini to generate AI recommendations.</p>
             </form>
+            {% else %}
+            <div class="upload-box upload-login-prompt">
+                <div class="upload-icon">↑</div>
+                <h3>Upload your resume</h3>
+                <p>Sign in with Google to upload and analyze your resume.</p>
+                <span class="upload-note">PDF or TXT • Maximum 10 MB</span>
+            </div>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="{{ url_for('login') }}">Sign in to upload</a>
+            </div>
+            <div class="trust-row">
+                <span>✓ Google sign-in before upload</span>
+                <span>✓ Temporary analysis</span>
+                <span>✓ ATS feedback</span>
+            </div>
+            <p class="privacy-note">Your resume is processed only after sign-in. It is deleted after text extraction, and the app does not save your resume or results.</p>
+            {% endif %}
 
             {% if error %}
             <div class="error-message">
