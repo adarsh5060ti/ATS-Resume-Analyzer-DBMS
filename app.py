@@ -75,6 +75,11 @@ if google_client_id and google_client_secret:
 else:
     google = None
 
+# Enable the sign-in gate once Google OAuth is configured on the host. This
+# keeps an unconfigured deployment usable while preventing anonymous uploads
+# as soon as the Google client credentials are added.
+LOGIN_REQUIRED = google is not None
+
 # Render terminates TLS at its proxy. Trust the forwarded scheme/host so the
 # OAuth callback URL is generated as the public HTTPS URL registered at Google.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -128,6 +133,12 @@ def protect_post_requests():
         expected = session.get("_csrf_token", "")
         if not expected or not hmac.compare_digest(supplied, expected):
             abort(400, description="The form expired. Refresh the page and try again.")
+
+
+@app.before_request
+def require_login_for_resume_analysis():
+    if LOGIN_REQUIRED and request.endpoint in {"home", "analyze"} and not current_user.is_authenticated:
+        return redirect(url_for("login"))
 
 
 @app.before_request
