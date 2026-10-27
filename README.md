@@ -7,7 +7,7 @@ A public Flask application that analyzes PDF/TXT resumes and returns an ATS-styl
 - Public resume analysis with no account required.
 - Temporary upload processing: the uploaded file is deleted after text extraction, and the result is rendered without writing it to the app database.
 - ATS score breakdown, Gemini recommendations when configured, and rule-based fallback. Extracted resume text is sent to Gemini for AI recommendations.
-- The public app exposes only the home page, static assets, health check and temporary analysis endpoint. Legacy account, dashboard, resume CRUD, jobs and admin routes are disabled in public mode.
+- The public app exposes the home page, static assets, health check, temporary analysis endpoint and optional Google sign-in. Legacy password registration, dashboard, resume CRUD, jobs and admin routes remain disabled in public mode.
 - Ten related relational tables, foreign keys, unique/check constraints, indexes, an analytics view and a score-sync trigger.
 - Local SQLite by default; PostgreSQL can be selected with `DATABASE_URL`.
 - SQLite backup script and Render deployment blueprint.
@@ -32,7 +32,7 @@ Edit `.env` and replace `SECRET_KEY` with a generated value. For example:
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Paste the generated value into `.env`. Add a Gemini API key only if you want AI-generated recommendations. Without it, the app uses its rule-based recommendations.
+Paste the generated value into `.env`. Add a Gemini API key only if you want AI-generated recommendations. Without it, the app uses its rule-based recommendations. Google sign-in is optional; to enable it locally, also set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from a Google OAuth web client.
 
 Start the app:
 
@@ -61,6 +61,16 @@ Create `.env` as described above, then run `docker compose up --build`. The comp
 ## Deployment preparation
 
 `render.yaml` prepares a Python web service using Render's current Flask start pattern. Before creating it, supply `SECRET_KEY` and optionally `GEMINI_API_KEY` through the hosting provider's secret settings. Do not put production secrets in Git. The app does not retain public resume uploads or analysis results. No public service is created by this repository file alone.
+
+### Google sign-in
+
+Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the Render service environment. In the Google OAuth web client, register this authorized redirect URI:
+
+```text
+https://ats-resume-analyzer-dbms.onrender.com/auth/google/callback
+```
+
+The sign-in is optional. The public resume analyzer remains available without an account. Google profile details are kept only in the signed session cookie; Google tokens, uploaded resumes and analysis results are not saved by the public analysis flow. Without both OAuth settings, the login page explains that Google sign-in is not yet configured.
 
 ## Project documentation
 

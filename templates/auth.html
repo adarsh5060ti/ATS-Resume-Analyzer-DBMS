@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Create account' if mode == 'register' else 'Sign in' }} · ATS Analyzer{% endblock %}
+{% block title %}Sign in · ATSAnalyzer{% endblock %}
 {% block content %}
-<section class="auth-card">
-  <p class="eyebrow">RESUME ANALYSIS WORKSPACE</p>
-  <h1>{{ 'Create your account' if mode == 'register' else 'Welcome back' }}</h1>
-  <p class="muted">{{ 'Save and manage your resume analyses securely.' if mode == 'register' else 'Sign in to view your dashboard and saved analyses.' }}</p>
-  <form method="post" class="stack-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    {% if mode == 'register' %}<label>Full name<input name="full_name" maxlength="120" autocomplete="name" required value="{{ request.form.get('full_name','') }}"></label><label>Invite code <span class="muted">(required after the first account)</span><input name="invite_code" autocomplete="off"></label>{% endif %}
-    <label>Email<input name="email" type="email" maxlength="254" autocomplete="email" required value="{{ request.form.get('email','') }}"></label>
-    <label>Password<input name="password" type="password" minlength="10" maxlength="128" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" required></label>
-    {% if mode == 'login' %}<label class="check"><input type="checkbox" name="remember" value="1"> Keep me signed in</label>{% endif %}
-    <button class="button primary">{{ 'Create account' if mode == 'register' else 'Sign in' }}</button>
-  </form>
-  <p class="muted">{% if mode == 'register' %}Already registered? <a href="{{ url_for('login') }}">Sign in</a>{% else %}New here? <a href="{{ url_for('register') }}">Create an account</a>{% endif %}</p>
-  {% if mode == 'register' %}<p class="hint">The first account in a fresh database is administrator. Later registrations require a code set by the administrator.</p>{% endif %}
+<section class="auth-card google-auth-card">
+  <p class="eyebrow">ATSANALYZER ACCOUNT</p>
+  <h1>Sign in</h1>
+  <p class="muted">Use your Google account to sign in. You can still analyze a resume without signing in.</p>
+  {% if google_oauth_configured %}
+  <a class="button google-button" href="{{ url_for('google_login') }}" aria-label="Continue with Google">
+    <svg aria-hidden="true" viewBox="0 0 48 48" width="20" height="20"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.8 6.1-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8l6.8-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6 29.5 4 24 4A20 20 0 0 0 5.8 15.1l6.8 5.3C14.2 15.6 18.7 12 24 12Z"/></svg>
+    <span>Continue with Google</span>
+  </a>
+  {% else %}
+  <div class="hint oauth-setup-note">Google sign-in is not configured yet. Add <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> to the hosting environment to enable it.</div>
+  {% endif %}
+  <p class="auth-privacy muted">Sign-in is optional. Resume uploads and analysis results continue to be processed temporarily and are not saved.</p>
+  <a class="auth-home-link" href="{{ url_for('home') }}">Back to resume analysis</a>
 </section>
 {% endblock %}

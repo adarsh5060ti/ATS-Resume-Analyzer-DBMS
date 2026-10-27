@@ -10,9 +10,11 @@ from pathlib import Path
 
 from flask import Flask, abort, flash, make_response, redirect, render_template, request, session, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+from authlib.integrations.flask_client import OAuth
 from sqlalchemy import event, func, or_
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -59,11 +61,53 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
+oauth = OAuth(app)
+google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+google_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+if google_client_id and google_client_secret:
+    google = oauth.register(
+        name="google",
+        client_id=google_client_id,
+        client_secret=google_client_secret,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+else:
+    google = None
+
+# Render terminates TLS at its proxy. Trust the forwarded scheme/host so the
+# OAuth callback URL is generated as the public HTTPS URL registered at Google.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+
+class GoogleIdentity:
+    """A signed-session identity; profile data is not written to the database."""
+
+    is_authenticated = True
+    is_active = True
+    is_anonymous = False
+    is_admin = False
+
+    def __init__(self, subject, name, email):
+        self.id = f"google:{subject}"
+        self.full_name = name
+        self.email = email
+
+    def get_id(self):
+        return self.id
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    if user_id.startswith("google:"):
+        profile = session.get("google_identity", {})
+        if profile.get("sub") == user_id.removeprefix("google:"):
+            return GoogleIdentity(profile["sub"], profile["name"], profile["email"])
+        return None
+    try:
+        return db.session.get(User, int(user_id))
+    except (TypeError, ValueError):
+        return None
 
 
 def csrf_token():
@@ -89,8 +133,11 @@ def protect_post_requests():
 @app.before_request
 def restrict_to_ephemeral_public_analyzer():
     # This deployment mode exposes only one-time public analysis. Legacy
-    # account, dashboard, resume CRUD, jobs and admin endpoints are disabled.
-    if request.endpoint in {"home", "analyze", "health", "static"}:
+    # dashboard, resume CRUD, jobs and admin endpoints remain disabled.
+    if request.endpoint in {
+        "home", "analyze", "health", "static", "login",
+        "google_login", "google_callback", "logout",
+    }:
         return None
     return redirect(url_for("home"))
 
@@ -205,26 +252,52 @@ def register():
     return render_template("auth.html", mode="register")
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.get("/login")
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        user = User.query.filter(func.lower(User.email) == email).first()
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user, remember=request.form.get("remember") == "1")
-            flash("Welcome back.", "success")
-            return redirect(url_for("dashboard"))
-        flash("Email or password is incorrect.", "error")
-    return render_template("auth.html", mode="login")
+        return redirect(url_for("home"))
+    return render_template("auth.html", google_oauth_configured=google is not None)
+
+
+@app.get("/auth/google")
+def google_login():
+    if google is None:
+        flash("Google sign-in is not configured yet. Please try again later.", "info")
+        return redirect(url_for("login"))
+    callback_url = url_for("google_callback", _external=True)
+    return google.authorize_redirect(callback_url, prompt="select_account")
+
+
+@app.get("/auth/google/callback")
+def google_callback():
+    if google is None:
+        return redirect(url_for("login"))
+    try:
+        token = google.authorize_access_token()
+        profile = token.get("userinfo") or {}
+        subject = str(profile.get("sub", "")).strip()
+        email = str(profile.get("email", "")).strip().lower()
+        name = str(profile.get("name", "")).strip() or email
+        if not subject or not email or not profile.get("email_verified"):
+            flash("Google did not provide a verified email address. Try another account.", "error")
+            return redirect(url_for("login"))
+
+        # Keep only the minimum profile needed for this optional sign-in. No
+        # Google token, resume, or analysis result is persisted by this route.
+        session["google_identity"] = {"sub": subject, "name": name[:120], "email": email[:254]}
+        login_user(GoogleIdentity(subject, name, email), fresh=True)
+        flash("Signed in with Google.", "success")
+        return redirect(url_for("home"))
+    except Exception:
+        app.logger.exception("Google sign-in failed")
+        flash("Google sign-in could not be completed. Please try again.", "error")
+        return redirect(url_for("login"))
 
 
 @app.post("/logout")
-@login_required
 def logout():
-    logout_user()
+    if current_user.is_authenticated:
+        logout_user()
     session.clear()
     flash("You have been signed out.", "success")
     return redirect(url_for("login"))
