@@ -1,32 +1,34 @@
-ATS RESUME ANALYZER - CURRENT DATABASE DEMO
+ATS RESUME ANALYZER - FACULTY DATABASE DEMO
 
-The active app uses Flask and SQLAlchemy ORM. The previous Oracle app is preserved as legacy_oracle_app.py; do not use its old demo credentials or instructions as current setup.
+IMPORTANT
+The live website processes uploads temporarily and does not store resume or analysis rows. Google sign-in protects upload when OAuth is configured, but the Google profile is kept in the signed session rather than saved to the users table. The populated database below is a separate synthetic classroom demo, not live-user data.
 
-SETUP
-1. Install the requirements listed in requirements.txt in the project virtual environment.
-2. Copy .env.example to .env, set a unique SECRET_KEY, and optionally set GEMINI_API_KEY.
-3. Run: python app.py
-4. Open http://127.0.0.1:5000 and create the first account. The first local account is ADMIN.
-5. Upload a text-readable PDF or TXT file from the Dashboard.
+CREATE THE SYNTHETIC DEMO DATABASE
+From the project root, run:
+  python -m pip install -r requirements.txt
+  python scripts/create_faculty_demo_db.py
 
-APPLICATION DEMO
-1. Show the dashboard count and average score.
-2. Open an analysis and explain its keyword, skill, format, experience, and education components.
-3. Show detected skills, recommendations, candidate record editing, and deletion controls.
-4. Add a confirmed education or experience detail. Do not invent details not present in the sample resume.
-5. Use dashboard search and score filters; demonstrate pagination if enough records exist.
-6. Add and edit a target job description and its keywords.
-7. Sign in with a second account only after configuring REGISTRATION_CODE; explain USER versus ADMIN access.
+The script creates instance/faculty_demo.db and refuses to overwrite it. It fills all 10 tables using SQLAlchemy ORM and prints CRUD, join, aggregate, transaction rollback, view, and trigger demonstrations. To use a different new file:
+  python scripts/create_faculty_demo_db.py --output instance/faculty_demo_for_class.db
 
-DATABASE DEMO
-1. Explain the ten ORM tables using docs/ER_DIAGRAM.md and docs/DATA_DICTIONARY.md.
-2. Show that analysis writes occur through SQLAlchemy and are committed or rolled back as one transaction.
-3. Demonstrate the SQLite view resume_analysis_summary and trigger sync_resume_score_after_analysis using a disposable copy of the database.
-4. Run: python scripts/backup_database.py
-5. SQLite does not support stored procedures. Explain the assignment's “where supported” qualification.
+FACULTY PRESENTATION ORDER
+1. Open docs/ER_DIAGRAM.md and explain the entities and their relations.
+2. Open docs/DATA_DICTIONARY.md and point out keys, constraints, and indexes.
+3. Open models.py and show SQLAlchemy models and ORM relationships.
+4. Open instance/faculty_demo.db with DB Browser for SQLite.
+5. In Database Structure, show the 10 tables, indexes, view and trigger.
+6. In Browse Data, inspect the fictional role, user, resume, skill, education, experience, job, keyword, and analysis records.
+7. Run the demo script again only if creating a new output file; its output already shows ORM CRUD, a join, grouped count/average, trigger score sync, view output, rollback, and final row counts.
+8. Optional backup: python scripts/backup_database.py --source instance/faculty_demo.db
+9. Restore a separate copy, using the actual backup filename printed above:
+   python scripts/restore_database.py backup/faculty_demo_<timestamp>.db --output instance/faculty_demo_restored.db
 
-SUBMISSION EVIDENCE
-Replace report placeholders with actual team information. Capture screenshots from the live local application. Show GitHub collaborators, private repository, main/dev branches, real commit history, backup/restore proof, and deployment URL only after completing those tasks.
+The ten tables are roles, users, resumes, skills, resume_skills, education, experience, job_descriptions, job_keywords, and ats_analysis.
 
-PRIVACY
-Use a synthetic resume or one whose owner has agreed to its use. The repository ignores uploaded files, local database files, and backups. Never show real passwords, API keys, or candidate PII during a public review.
+WEBSITE DEMO
+Run python app.py and open http://127.0.0.1:5000. The homepage is public. When Google OAuth settings exist, sign-in is required before upload. Do not claim website uploads are saved: they are processed temporarily and are not inserted into the app database. Use a synthetic resume, especially if Gemini recommendations are enabled, because extracted text is sent to Google Gemini.
+
+SQLITE LIMITATION
+SQLite does not support native stored procedures. Explain the implemented transaction, resume_analysis_summary view, and sync_resume_score_after_analysis trigger accurately; do not call a trigger or Python helper a stored procedure.
+
+Use only fictional data during the classroom demo. Never show passwords, API keys, or real candidate information.

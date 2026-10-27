@@ -1,14 +1,54 @@
-# Local Demonstration Guide
+# Faculty Database Demonstration
 
-1. Activate the project virtual environment and install `requirements.txt`.
-2. Create `.env` from `.env.example`, set a private `SECRET_KEY`, and optionally set `GEMINI_API_KEY`.
-3. Run `python app.py`, open `http://127.0.0.1:5000`, and create the first account. It receives the `ADMIN` role.
-4. Upload a text-readable PDF or TXT resume. Explain that the application parses text, calculates five component scores and stores the record through SQLAlchemy.
-5. Open the resume detail page. Show contact fields, detected skills, scores, recommendations, and the education/experience forms.
-6. Use the dashboard search and score filters. Explain that ordinary users see their own records; the administrator can see all records and manage roles.
-7. Open Job descriptions and add a role with a comma-separated keyword list.
-8. Show the ER diagram and data dictionary. Explain the ten tables, keys, constraints, relationships, the SQL view and trigger. SQLite has no stored-procedure support.
-9. Back up the database with `python scripts/backup_database.py`, then restore the new file to the separate default copy with `python scripts/restore_database.py backup/<backup-file>.db`.
-10. Show the GitHub repository, `main` and `dev` branches, collaborator list and real commit history only after those steps are complete. Show the real deployed URL only after deployment succeeds.
+## Important distinction
 
-Do not display real candidate resumes or personal details during a public classroom demo. Use a synthetic sample or obtain permission from the owner of a sample resume.
+The live website is intentionally private about uploaded resumes: it processes uploads in memory and does not save resumes, scores, or recommendations in the application database. Google sign-in gates uploads when OAuth is configured, but the Google profile is kept in the signed session and is not inserted into `users`. The public deployment does not expose the saved-resume dashboard, CRUD, jobs, or admin screens.
+
+For a populated database walkthrough, use the separate local `faculty_demo.db` created below. It contains synthetic classroom records only and is not connected to the live site or the normal local database.
+
+## Create the disposable demonstration database
+
+From the project root in PowerShell:
+
+```powershell
+python -m pip install -r requirements.txt
+python scripts/create_faculty_demo_db.py
+```
+
+The script refuses to overwrite an existing file. It creates `instance/faculty_demo.db`, fills all ten tables with fictional example data through SQLAlchemy ORM, then prints demonstrations of CRUD, an ORM join, an ORM aggregate, the SQLite view, the score-sync trigger, and a rolled-back transaction. The final counts confirm that the temporary CRUD row and rollback row were removed.
+
+If the database already exists, choose a new path rather than overwriting it:
+
+```powershell
+python scripts/create_faculty_demo_db.py --output instance/faculty_demo_for_class.db
+```
+
+## Show the schema visually
+
+1. Open `instance/faculty_demo.db` in DB Browser for SQLite.
+2. On **Database Structure**, show the ten tables, primary keys, indexes, the view, and the trigger.
+3. On **Browse Data**, inspect the role, user, resume, skill, education, experience, job, keyword, and analysis rows.
+4. Open `docs/ER_DIAGRAM.md` and `docs/DATA_DICTIONARY.md` beside the database. Trace `roles → users → resumes → ats_analysis`, and the `resumes ↔ skills` relation through `resume_skills`.
+5. Show `models.py` to explain that ordinary inserts, updates, deletes, joins, and aggregates use SQLAlchemy ORM. The SQLite view and trigger are the advanced database features implemented with SQL.
+6. Run `python scripts/backup_database.py --source instance/faculty_demo.db` to create a timestamped backup under `backup/`.
+7. Restore that backup to a separate file (copy the actual backup filename from the command output):
+
+   ```powershell
+   python scripts/restore_database.py backup/faculty_demo_<timestamp>.db --output instance/faculty_demo_restored.db
+   ```
+
+   The restore script checks SQLite integrity and does not overwrite an existing destination by default.
+
+The ten tables are `roles`, `users`, `resumes`, `skills`, `resume_skills`, `education`, `experience`, `job_descriptions`, `job_keywords`, and `ats_analysis`.
+
+## Demonstrate the website separately
+
+Run `python app.py`, then open `http://127.0.0.1:5000`. Anyone can view the homepage. If Google OAuth settings are present, sign-in is requested when uploading; if they are absent, the local app stays open for development. A website analysis is temporary and does not create a resume or analysis row in either database. Do not claim the public site saved a resume.
+
+Use a fictional sample resume if showing upload. When Gemini recommendations are enabled, extracted resume text is sent to Google Gemini; disclose that to the faculty and use only synthetic or consented material.
+
+## What to say about SQLite
+
+SQLite has no native stored-procedure feature. The project demonstrates a SQLAlchemy transaction, a `resume_analysis_summary` view, and the `sync_resume_score_after_analysis` trigger. Do not describe the view, trigger, or Python helper as a stored procedure.
+
+The application creates the schema from the ORM models on startup. Its seeded `ADMIN` and `USER` rows are role definitions; the live Google session is not persisted as an app user. The populated `faculty_demo.db` is an isolated academic demonstration file.

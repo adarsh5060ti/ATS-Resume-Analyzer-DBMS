@@ -40,7 +40,7 @@ Start the app:
 python app.py
 ```
 
-Open `http://127.0.0.1:5000` and upload a PDF or TXT file. No account is needed. The upload is deleted after text extraction, and neither the resume nor its score/recommendations are stored by this app. The extracted text is sent to Gemini when AI recommendations are enabled.
+Open `http://127.0.0.1:5000`. If `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are configured, sign in with Google before uploading; without them, the local development analyzer remains open. The upload is deleted after text extraction, and neither the resume nor its score/recommendations are stored by this app. The extracted text is sent to Gemini when AI recommendations are enabled.
 
 ## Database
 
@@ -79,6 +79,8 @@ When Google OAuth is configured, users must sign in before accessing resume uplo
 - [Data dictionary](docs/DATA_DICTIONARY.md)
 - [Requirement status](docs/REQUIREMENTS_MATRIX.md)
 - [Demo guide](docs/DEMO_GUIDE.md)
+
+For a populated, isolated SQLite database walkthrough, run `python scripts/create_faculty_demo_db.py`. It creates a synthetic `instance/faculty_demo.db` and demonstrates ORM CRUD, joins, aggregates, a transaction, plus the SQLite view and trigger. The file is separate from the public website data.
 
 ## GitHub checklist
 
